@@ -1,3 +1,6 @@
+<a href='https://ko-fi.com/W7W61NW50T' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi6.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+
+
 # E-Invoice Pro for PerfexCRM (Romania)
 
 A minimalist, fully configurable module for PerfexCRM designed to generate UBL XML files compliant with the **Romanian e-factura national system (RO e-factura)**.
