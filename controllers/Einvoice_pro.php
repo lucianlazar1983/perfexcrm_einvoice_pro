@@ -42,4 +42,39 @@ class Einvoice_pro extends AdminController
         // Încarcă și afișează template-ul XML cu datele pregătite
         $this->load->view('einvoice_pro/xml/template', $data);
     }
+
+    public function manage_notes($action, $note_index)
+    {
+        if (!is_admin()) {
+            access_denied('E-Invoice Pro Manage Notes');
+        }
+
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+
+        $option_name = 'einvoice_pro_custom_notes_' . $note_index;
+        $current_notes = get_option($option_name);
+        $notes_array = !empty($current_notes) ? json_decode($current_notes, true) : [];
+
+        if ($action == 'add') {
+            $new_note = $this->input->post('note_value');
+            if (!in_array($new_note, $notes_array)) {
+                $notes_array[] = $new_note;
+                update_option($option_name, json_encode($notes_array));
+                echo json_encode(['success' => true, 'message' => 'Value added successfully']);
+            } else {
+                echo json_encode(['success' => false, 'message' => _l('e_invoice_value_exists')]);
+            }
+        } elseif ($action == 'delete') {
+            $note_to_delete = $this->input->post('note_value');
+            if (($key = array_search($note_to_delete, $notes_array)) !== false) {
+                unset($notes_array[$key]);
+                update_option($option_name, json_encode(array_values($notes_array)));
+                echo json_encode(['success' => true, 'message' => 'Value deleted successfully']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Value not found']);
+            }
+        }
+    }
 }
