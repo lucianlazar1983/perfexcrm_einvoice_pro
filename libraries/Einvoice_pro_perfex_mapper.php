@@ -108,7 +108,7 @@ final class Einvoice_pro_perfex_mapper
      */
     private function supplier(): array
     {
-        $country = $this->country(get_option('invoice_company_country'), 'seller.country');
+        $country = $this->country($this->supplierCountrySource(), 'seller.country');
         $fiscalIdentifier = $this->optionalString(get_option('company_vat'));
         $vat = $this->vatIdentifier($fiscalIdentifier, $country);
         $registration = $this->optionalString(get_option('einvoice_pro_registration_number'));
@@ -408,12 +408,35 @@ final class Einvoice_pro_perfex_mapper
             throw new Einvoice_pro_validation_exception($rule, 'A country is missing from the invoice snapshot.');
         }
 
+        $identifier = trim((string) $identifier);
+        if (preg_match('/^[A-Za-z]{2}$/D', $identifier)) {
+            return Einvoice_pro_codes::country($identifier);
+        }
+
         $country = get_country($identifier);
-        if (!$country || !isset($country->iso2) || !is_string($country->iso2)) {
+        $iso2 = is_object($country) && isset($country->iso2)
+            ? $country->iso2
+            : (is_array($country) && isset($country['iso2']) ? $country['iso2'] : null);
+        if (!is_string($iso2)) {
             throw new Einvoice_pro_validation_exception($rule, 'A country could not be resolved by Perfex.');
         }
 
-        return Einvoice_pro_codes::country($country->iso2);
+        return Einvoice_pro_codes::country($iso2);
+    }
+
+    /**
+     * Uses Perfex 3.4's explicit company country code before the legacy country identifier.
+     *
+     * @return mixed
+     */
+    private function supplierCountrySource()
+    {
+        $countryCode = get_option('invoice_company_country_code');
+        if ((is_string($countryCode) || is_int($countryCode)) && trim((string) $countryCode) !== '') {
+            return $countryCode;
+        }
+
+        return get_option('invoice_company_country');
     }
 
     /**

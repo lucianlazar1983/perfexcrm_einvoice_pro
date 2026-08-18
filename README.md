@@ -4,9 +4,9 @@ E-Invoice RO is a Romanian UBL invoice generation layer for Perfex CRM. It adds 
 
 The public product name changed from **E-Invoice Pro** to **E-Invoice RO** in version 2.0.2 so its Romanian scope is explicit. The technical module identifier remains `einvoice_pro`; its directory, initialization file, routes, option keys, classes, hooks, migration history, and package root are intentionally unchanged for upgrade compatibility.
 
-## Version 2.0.2 status
+## Version 2.0.3 status
 
-Version 2.0.2 is the current development release. It replaces the PHP XML view and floating-point legacy mapper with a fail-closed Perfex adapter, a canonical invoice builder, string-decimal reconciliation, and a DOM serializer. It preserves every released 1.4.3–2.0.1 setting and adds only an explicit default unit setting during migration.
+Version 2.0.3 is the current development release. It fixes seller-country resolution for Perfex 3.4 by reading the explicit `invoice_company_country_code` first, while keeping compatibility with the legacy country identifier. It does not change XML semantics, stored settings, or the technical module identity introduced through 2.0.2.
 
 Synthetic fixtures for standard VAT, two VAT rates, exempt, reverse-charge, non-VAT seller, document discount, adjustment, foreign invoice currency with RON accounting VAT, and unidentified Romanian B2C pass the internal suite. All representative fixtures also passed the normative OASIS UBL 2.1 Invoice XSD and the official CEN/TC 434 EN 16931 UBL 1.3.16 Schematron during the August 18, 2026 development verification.
 
@@ -36,7 +36,7 @@ The module does not upload invoices to ANAF, manage SPV/OAuth credentials or cer
 
 - the module uses Perfex's documented `register_activation_hook` API;
 - clean activation is idempotent and does not replace existing option values;
-- migrations `200_version_200.php`, `201_version_201.php`, and `202_version_202.php` support sequential native upgrades without rewriting released settings;
+- migrations `200_version_200.php` through `203_version_203.php` support sequential native upgrades without rewriting released settings;
 - helper loading uses the documented `einvoice_pro/einvoice_pro` module path from both bootstrap hooks and the controller;
 - malformed legacy custom-note JSON is preserved and marked for manual review instead of being silently replaced;
 - module functions and constants use the `einvoice_pro_` and `EINVOICE_PRO_` prefixes;
@@ -109,14 +109,14 @@ Activation creates only missing module options. Retrying activation does not ove
 
 ## Upgrade from 1.4.3 or 2.0.x
 
-Version 1.4.3 is the supported upgrade floor for 2.0.2.
+Version 1.4.3 is the supported upgrade floor for 2.0.3.
 
 1. Back up the complete module directory and Perfex database together.
 2. Record the current E-Invoice RO registration, bank, language, selected-note, and custom-note values.
-3. Replace the existing files with the 2.0.2 package without deleting database options.
-4. Open **Setup → Modules** and confirm that Perfex detects version 2.0.2.
+3. Replace the existing files with the 2.0.3 package without deleting database options.
+4. Open **Setup → Modules** and confirm that Perfex detects version 2.0.3.
 5. Run the normal Perfex **Upgrade Database** action.
-6. Perfex runs the missing migrations in order. Migration 202 adds `einvoice_pro_default_unit_code=H87` only when the option does not exist; all earlier values remain unchanged.
+6. Perfex runs the missing migrations in order. Migration 202 adds `einvoice_pro_default_unit_code=H87` only when the option does not exist; migration 203 is data-neutral. All earlier values remain unchanged.
 7. Reopen the settings page and compare every recorded value.
 8. Verify authorized and unauthorized invoice access through the actual download endpoint.
 9. Validate a representative set of synthetic XML documents before considering the upgraded installation operational.
