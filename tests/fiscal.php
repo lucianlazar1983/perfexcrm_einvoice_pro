@@ -276,4 +276,4 @@ if ($failures !== []) {
     exit(1);
 }
 
-fwrite(STDOUT, "E-Invoice Pro fiscal fixtures passed.\n");
+fwrite(STDOUT, "E-Invoice RO fiscal fixtures passed.\n");

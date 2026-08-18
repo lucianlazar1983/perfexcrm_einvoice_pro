@@ -1,10 +1,10 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-$lang['e_invoice_pro'] = 'E-Invoice Pro';
-$lang['e_invoice_pro_module_description'] = 'Generează fișiere UBL pentru e-Factura din facturile Perfex CRM.';
-$lang['e_invoice_button_text'] = 'e-Factura';
-$lang['e_invoice_settings_title'] = 'Setări Modul E-Invoice Pro';
+$lang['e_invoice_pro'] = 'E-Invoice RO';
+$lang['e_invoice_pro_module_description'] = 'Generează fișiere UBL românești cu mapare fiscală strictă pentru Perfex CRM.';
+$lang['e_invoice_button_text'] = 'XML E-Invoice RO';
+$lang['e_invoice_settings_title'] = 'Setări E-Invoice RO';
 $lang['e_invoice_reg_number'] = 'Numarul Registrului Comertului';
 $lang['e_invoice_reg_number_placeholder'] = 'ex: J12/1234/1999';
 $lang['e_invoice_capital_social'] = 'Capital Social (doar valoarea numerică)';

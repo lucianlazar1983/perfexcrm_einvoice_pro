@@ -278,4 +278,4 @@ if ($failures !== []) {
     exit(1);
 }
 
-fwrite(STDOUT, "E-Invoice Pro Perfex adapter fixture passed.\n");
+fwrite(STDOUT, "E-Invoice RO Perfex adapter fixture passed.\n");

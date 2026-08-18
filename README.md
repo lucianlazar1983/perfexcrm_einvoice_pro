@@ -1,6 +1,8 @@
-# E-Invoice Pro for Perfex CRM
+# E-Invoice RO for Perfex CRM
 
-E-Invoice Pro is a Perfex CRM module for generating Romanian UBL invoice XML from Perfex invoices. It provides an invoice download action, Romanian company and payment settings, reusable plain-text notes, English and Romanian administration text, and a native Perfex upgrade path.
+E-Invoice RO is a Romanian UBL invoice generation layer for Perfex CRM. It adds strict fiscal mapping, deterministic reconciliation, a controlled XML download action, Romanian company and payment settings, reusable plain-text notes, English and Romanian administration text, and a native Perfex upgrade path.
+
+The public product name changed from **E-Invoice Pro** to **E-Invoice RO** in version 2.0.2 so its Romanian scope is explicit. The technical module identifier remains `einvoice_pro`; its directory, initialization file, routes, option keys, classes, hooks, migration history, and package root are intentionally unchanged for upgrade compatibility.
 
 ## Version 2.0.2 status
 
@@ -95,11 +97,11 @@ Perfex CRM 3.4 introduced native e-invoice exports. Confirm action placement, ho
 ## Clean installation
 
 1. Back up the Perfex files and database.
-2. Build or obtain the E-Invoice Pro archive and inspect its checksum and contents.
+2. Build or obtain the E-Invoice RO archive and inspect its checksum and contents.
 3. Install the archive from **Setup → Modules**, or place the `einvoice_pro` directory under the Perfex `modules` directory.
 4. Confirm that both the directory and initialization file are named `einvoice_pro` and `einvoice_pro.php`.
-5. Activate **E-Invoice Pro**.
-6. Open **Setup → Settings → Finance → E-Invoice Pro**.
+5. Activate **E-Invoice RO**.
+6. Open **Setup → Settings → Finance → E-Invoice RO**.
 7. Review every value; do not rely on defaults as proof of correct fiscal identity.
 8. Test administrator access, staff permissions, direct URL denial, note management, and XML download using synthetic invoices.
 
@@ -110,7 +112,7 @@ Activation creates only missing module options. Retrying activation does not ove
 Version 1.4.3 is the supported upgrade floor for 2.0.2.
 
 1. Back up the complete module directory and Perfex database together.
-2. Record the current E-Invoice Pro registration, bank, language, selected-note, and custom-note values.
+2. Record the current E-Invoice RO registration, bank, language, selected-note, and custom-note values.
 3. Replace the existing files with the 2.0.2 package without deleting database options.
 4. Open **Setup → Modules** and confirm that Perfex detects version 2.0.2.
 5. Run the normal Perfex **Upgrade Database** action.

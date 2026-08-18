@@ -1,11 +1,12 @@
 # Changelog
 
-All notable changes to E-Invoice Pro are documented here. Versions follow Semantic Versioning where fiscal-output changes require at least a minor release after the 2.0.0 architecture baseline.
+All notable changes to E-Invoice RO are documented here. Versions follow Semantic Versioning where fiscal-output changes require at least a minor release after the 2.0.0 architecture baseline.
 
 ## 2.0.2 - Unreleased
 
 ### Changed
 
+- rename the public product from E-Invoice Pro to E-Invoice RO while preserving the technical `einvoice_pro` identifier and every upgrade contract;
 - replace the legacy PHP XML view with a canonical document builder and DOM UBL serializer;
 - replace floating-point totals with deterministic string-decimal arithmetic and reconciliation;
 - omit `TaxCurrencyCode` when it matches the invoice currency and require accounting-currency VAT when it differs;

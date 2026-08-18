@@ -1,10 +1,10 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-$lang['e_invoice_pro'] = 'E-Invoice Pro';
-$lang['e_invoice_pro_module_description'] = 'Generates Romanian UBL e-invoice files from Perfex CRM invoices.';
-$lang['e_invoice_button_text'] = 'e-Invoice';
-$lang['e_invoice_settings_title'] = 'E-Invoice Pro Module Settings';
+$lang['e_invoice_pro'] = 'E-Invoice RO';
+$lang['e_invoice_pro_module_description'] = 'Generates Romanian UBL invoice files with strict fiscal mapping for Perfex CRM.';
+$lang['e_invoice_button_text'] = 'E-Invoice RO XML';
+$lang['e_invoice_settings_title'] = 'E-Invoice RO Settings';
 $lang['e_invoice_reg_number'] = 'Company Registration Number';
 $lang['e_invoice_reg_number_placeholder'] = 'e.g. J12/1234/1999';
 $lang['e_invoice_capital_social'] = 'Social Capital (numeric value only)';

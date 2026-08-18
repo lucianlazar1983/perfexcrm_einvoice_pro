@@ -47,7 +47,7 @@ class Einvoice_pro extends AdminController
         } catch (Einvoice_pro_validation_exception $exception) {
             log_message(
                 'warning',
-                'E-Invoice Pro blocked invoice ' . $invoiceId . ' with rule ' . $exception->rule()
+                'E-Invoice RO blocked invoice ' . $invoiceId . ' with rule ' . $exception->rule()
             );
             show_error(
                 _l('e_invoice_generation_blocked') . ' '
@@ -61,7 +61,7 @@ class Einvoice_pro extends AdminController
             $correlationId = bin2hex(random_bytes(8));
             log_message(
                 'error',
-                'E-Invoice Pro generation failure ' . $correlationId . ' for invoice ' . $invoiceId
+                'E-Invoice RO generation failure ' . $correlationId . ' for invoice ' . $invoiceId
             );
             show_error(
                 _l('e_invoice_generation_internal_error') . ' ' . $correlationId,
@@ -89,7 +89,7 @@ class Einvoice_pro extends AdminController
     public function save_settings(): void
     {
         if (!is_admin()) {
-            access_denied('E-Invoice Pro Settings');
+            access_denied('E-Invoice RO Settings');
         }
         if ($this->input->method(true) !== 'POST') {
             show_404();
@@ -121,7 +121,7 @@ class Einvoice_pro extends AdminController
     public function manage_notes($action = null, $note_index = null): void
     {
         if (!is_admin()) {
-            access_denied('E-Invoice Pro Manage Notes');
+            access_denied('E-Invoice RO Manage Notes');
         }
 
         if ($this->input->method(true) !== 'POST' || !$this->input->is_ajax_request()) {

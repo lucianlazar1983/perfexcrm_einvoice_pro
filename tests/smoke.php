@@ -162,6 +162,12 @@ $einvoiceProTestFailures = [];
 $bootstrapSource = file_get_contents(dirname(__DIR__) . '/einvoice_pro.php');
 $controllerSource = file_get_contents(dirname(__DIR__) . '/controllers/Einvoice_pro.php');
 einvoice_pro_test_same(
+    1,
+    substr_count((string) $bootstrapSource, 'Module Name: E-Invoice RO'),
+    'public module name'
+);
+einvoice_pro_test_same('einvoice_pro', EINVOICE_PRO_MODULE_NAME, 'stable technical module identifier');
+einvoice_pro_test_same(
     2,
     substr_count((string) $bootstrapSource, "load->helper('einvoice_pro/einvoice_pro')"),
     'module-scoped bootstrap helper paths'
@@ -296,4 +302,4 @@ if ($einvoiceProTestFailures !== []) {
     exit(1);
 }
 
-fwrite(STDOUT, "E-Invoice Pro smoke checks passed.\n");
+fwrite(STDOUT, "E-Invoice RO smoke checks passed.\n");

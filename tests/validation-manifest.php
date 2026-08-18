@@ -31,4 +31,4 @@ foreach ($manifest['artifacts'] as $artifact) {
     }
 }
 
-fwrite(STDOUT, "E-Invoice Pro validation manifest passed.\n");
+fwrite(STDOUT, "E-Invoice RO validation manifest passed.\n");

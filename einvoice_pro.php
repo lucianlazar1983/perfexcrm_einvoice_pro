@@ -2,8 +2,8 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 /*
-Module Name: E-Invoice Pro
-Description: Generates Romanian UBL e-invoice files from Perfex CRM invoices.
+Module Name: E-Invoice RO
+Description: Generates Romanian UBL invoice files with strict fiscal mapping for Perfex CRM.
 Version: 2.0.2
 Requires at least: 3.4.1
 Author: Lucian Lazar
