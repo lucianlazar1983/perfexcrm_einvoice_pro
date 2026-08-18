@@ -83,6 +83,30 @@ function add_option(string $name, $value): void
 }
 
 /**
+ * Reads one option from the isolated test store.
+ *
+ * @return mixed
+ */
+function get_option(string $name)
+{
+    global $einvoiceProTestOptions;
+
+    return $einvoiceProTestOptions[$name] ?? false;
+}
+
+/**
+ * Updates one option in the isolated test store.
+ *
+ * @param mixed $value
+ */
+function update_option(string $name, $value): void
+{
+    global $einvoiceProTestOptions;
+
+    $einvoiceProTestOptions[$name] = $value;
+}
+
+/**
  * Supplies the authentication state required by the permission helper.
  */
 function is_staff_logged_in(): bool
@@ -138,6 +162,12 @@ $einvoiceProTestFailures = [];
 $bootstrapSource = file_get_contents(dirname(__DIR__) . '/einvoice_pro.php');
 $controllerSource = file_get_contents(dirname(__DIR__) . '/controllers/Einvoice_pro.php');
 einvoice_pro_test_same(
+    1,
+    substr_count((string) $bootstrapSource, 'Module Name: E-Invoice RO'),
+    'public module name'
+);
+einvoice_pro_test_same('einvoice_pro', EINVOICE_PRO_MODULE_NAME, 'stable technical module identifier');
+einvoice_pro_test_same(
     2,
     substr_count((string) $bootstrapSource, "load->helper('einvoice_pro/einvoice_pro')"),
     'module-scoped bootstrap helper paths'
@@ -161,6 +191,32 @@ $decodedNotes = einvoice_pro_decode_custom_notes($encodedNotes);
 einvoice_pro_test_same(true, $decodedNotes['valid'], 'valid custom-note JSON');
 einvoice_pro_test_same(['Notă ăâîșț', '<&"'], $decodedNotes['notes'], 'custom-note text preservation');
 einvoice_pro_test_same(false, einvoice_pro_decode_custom_notes('{broken')['valid'], 'invalid custom-note JSON');
+
+$einvoiceProTestOptions = [
+    'einvoice_pro_custom_notes_1' => '["Notă sintetică"]',
+    'einvoice_pro_custom_notes_2' => '[]',
+    'einvoice_pro_custom_notes_3' => '[]',
+];
+$validSettings = einvoice_pro_validate_settings([
+    'einvoice_pro_xml_language' => 'romanian',
+    'einvoice_pro_default_unit_code' => 'H87',
+    'einvoice_pro_registration_number' => 'J00/1/2026',
+    'einvoice_pro_company_legal_form' => '200',
+    'einvoice_pro_payment_iban' => 'RO49AAAA1B31007593840000',
+    'einvoice_pro_payment_bank_name' => 'Bancă sintetică',
+    'einvoice_pro_note_1' => 'Notă sintetică',
+    'einvoice_pro_note_2' => '',
+    'einvoice_pro_note_3' => '',
+]);
+einvoice_pro_test_same(true, $validSettings['valid'], 'server-side settings validation');
+einvoice_pro_test_same(
+    false,
+    einvoice_pro_validate_settings([
+        'einvoice_pro_xml_language' => 'romanian',
+        'einvoice_pro_default_unit_code' => 'NOT-A-UNIT',
+    ])['valid'],
+    'invalid settings rejected before writes'
+);
 
 $invoice = (object) ['addedfrom' => 7, 'sale_agent' => 0];
 $einvoiceProTestCapabilities = ['view_own' => true];
@@ -195,9 +251,9 @@ $expectedLegacyKeys = [
 einvoice_pro_test_same($expectedLegacyKeys, array_keys($fixture), 'legacy option fixture coverage');
 
 $einvoiceProTestOptions = $fixture;
-$optionsBeforeUpgrade = $einvoiceProTestOptions;
 call_user_func($einvoiceProTestActivation);
-einvoice_pro_test_same($optionsBeforeUpgrade, $einvoiceProTestOptions, 'activation preserves every 1.4.3 option');
+$expectedUpgradeOptions = $fixture + ['einvoice_pro_default_unit_code' => 'H87'];
+einvoice_pro_test_same($expectedUpgradeOptions, $einvoiceProTestOptions, 'activation preserves 1.4.3 options and adds 2.0.2 defaults');
 
 $einvoiceProTestOptions = [];
 call_user_func($einvoiceProTestActivation);
@@ -212,6 +268,7 @@ class App_module_migration
 
 require dirname(__DIR__) . '/migrations/200_version_200.php';
 require dirname(__DIR__) . '/migrations/201_version_201.php';
+require dirname(__DIR__) . '/migrations/202_version_202.php';
 
 $einvoiceProTestOptions = $fixture;
 $optionsBeforeMigration = $einvoiceProTestOptions;
@@ -222,6 +279,14 @@ einvoice_pro_test_same($optionsBeforeMigration, $einvoiceProTestOptions, 'migrat
 $migration = new Migration_Version_201();
 $migration->up();
 einvoice_pro_test_same($optionsBeforeMigration, $einvoiceProTestOptions, 'migration 201 preserves every 1.4.3 option');
+
+$migration = new Migration_Version_202();
+$migration->up();
+einvoice_pro_test_same(
+    $fixture + ['einvoice_pro_default_unit_code' => 'H87'],
+    $einvoiceProTestOptions,
+    'migration 202 preserves legacy options and adds the explicit unit default'
+);
 
 $lang = [];
 require dirname(__DIR__) . '/language/english/einvoice_pro_lang.php';
@@ -237,4 +302,4 @@ if ($einvoiceProTestFailures !== []) {
     exit(1);
 }
 
-fwrite(STDOUT, "E-Invoice Pro smoke checks passed.\n");
+fwrite(STDOUT, "E-Invoice RO smoke checks passed.\n");

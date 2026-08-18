@@ -1,5 +1,5 @@
 /**
- * Keeps E-Invoice Pro note controls isolated from the rest of the Perfex settings page.
+ * Keeps E-Invoice RO note controls isolated from the rest of the Perfex settings page.
  */
 (function einvoiceProSettings(window, document, $) {
     'use strict';

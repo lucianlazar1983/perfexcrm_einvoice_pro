@@ -39,7 +39,9 @@ $includedDirectories = [
     'controllers',
     'helpers',
     'language',
+    'libraries',
     'migrations',
+    'resources',
     'views',
 ];
 
