@@ -1,0 +1,13 @@
+{
+  "einvoice_pro_registration_number": "TEST-REG-1.4.3 & <upgrade>",
+  "einvoice_pro_payment_iban": "RO00 TEST 0000 0000 0000 0000",
+  "einvoice_pro_payment_bank_name": "Bancă sintetică \"Test\"",
+  "einvoice_pro_company_legal_form": "12345.67",
+  "einvoice_pro_note_1": "Notă personalizată cu diacritice: ăâîșț",
+  "einvoice_pro_note_2": "Text <literal> & \"ghilimele\"",
+  "einvoice_pro_note_3": "",
+  "einvoice_pro_xml_language": "romanian",
+  "einvoice_pro_custom_notes_1": "[\"Prima notă\",\"A doua & <notă>\"]",
+  "einvoice_pro_custom_notes_2": "[\"Linia 1\\nLinia 2\",\"Text cu \\\"ghilimele\\\"\"]",
+  "einvoice_pro_custom_notes_3": "[]"
+}

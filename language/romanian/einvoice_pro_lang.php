@@ -2,7 +2,7 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 $lang['e_invoice_pro'] = 'E-Invoice Pro';
-$lang['e_invoice_pro_module_description'] = 'Modul minimalist pentru generarea e-facturilor compatibile RO-UBL.';
+$lang['e_invoice_pro_module_description'] = 'Generează fișiere UBL pentru e-Factura din facturile Perfex CRM.';
 $lang['e_invoice_button_text'] = 'e-Factura';
 $lang['e_invoice_settings_title'] = 'Setări Modul E-Invoice Pro';
 $lang['e_invoice_reg_number'] = 'Numarul Registrului Comertului';
@@ -22,3 +22,18 @@ $lang['e_invoice_manage_values'] = 'Administrare Valori';
 $lang['e_invoice_add_new_value'] = 'Adaugă Valoare Nouă';
 $lang['e_invoice_custom_values'] = 'Valori Personalizate';
 $lang['e_invoice_value_exists'] = 'Această valoare există deja!';
+$lang['e_invoice_language_romanian'] = 'Română';
+$lang['e_invoice_language_english'] = 'Engleză';
+$lang['e_invoice_delete_confirmation'] = 'Ștergi această valoare personalizată?';
+$lang['e_invoice_delete_value'] = 'Șterge valoarea';
+$lang['e_invoice_invalid_action'] = 'Acțiunea cerută pentru notă nu este disponibilă.';
+$lang['e_invoice_invalid_note_index'] = 'Poziția selectată pentru notă nu este validă.';
+$lang['e_invoice_invalid_note_value'] = 'Introdu o notă validă de cel mult 500 de caractere.';
+$lang['e_invoice_note_limit_reached'] = 'Această poziție a atins numărul maxim de valori personalizate.';
+$lang['e_invoice_notes_storage_invalid'] = 'Valorile personalizate salvate sunt invalide și au rămas neschimbate. Verifică opțiunea înainte de editare.';
+$lang['e_invoice_notes_storage_review'] = 'Valorile salvate pentru această notă trebuie verificate. Au fost păstrate și nu pot fi editate momentan din acest ecran.';
+$lang['e_invoice_notes_save_failed'] = 'Valorile personalizate nu au putut fi salvate.';
+$lang['e_invoice_value_added'] = 'Valoarea a fost adăugată.';
+$lang['e_invoice_value_deleted'] = 'Valoarea a fost ștearsă.';
+$lang['e_invoice_value_not_found'] = 'Valoarea nu mai există.';
+$lang['e_invoice_request_failed'] = 'Cererea nu a putut fi finalizată. Încearcă din nou.';

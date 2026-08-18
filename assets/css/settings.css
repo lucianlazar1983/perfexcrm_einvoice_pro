@@ -1,0 +1,22 @@
+#einvoice-pro-settings .manage-values-wrapper {
+    margin-top: 5px;
+}
+
+#einvoice-pro-settings .manage-values-container {
+    margin-top: 10px;
+    padding: 12px;
+    border: 1px solid #e3e3e3;
+    background: #f9f9f9;
+}
+
+#einvoice-pro-settings .einvoice-pro-note-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+#einvoice-pro-settings .einvoice-pro-note-text {
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}

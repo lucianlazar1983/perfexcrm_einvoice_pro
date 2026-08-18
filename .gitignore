@@ -1,2 +1,9 @@
 ide_stubs.php
-*.md
+dist/
+vendor/
+.DS_Store
+.phpunit.cache/
+AGENTS.md
+ARCHITECTURE.md
+MODERNIZATION_PLAN.md
+VERIFICATION.md
