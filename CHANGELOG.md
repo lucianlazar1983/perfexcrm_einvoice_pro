@@ -2,7 +2,35 @@
 
 All notable changes to E-Invoice Pro are documented here. Versions follow Semantic Versioning where fiscal-output changes require at least a minor release after the 2.0.0 architecture baseline.
 
-## 2.0.1 - Unreleased
+## 2.0.2 - Unreleased
+
+### Changed
+
+- replace the legacy PHP XML view with a canonical document builder and DOM UBL serializer;
+- replace floating-point totals with deterministic string-decimal arithmetic and reconciliation;
+- omit `TaxCurrencyCode` when it matches the invoice currency and require accounting-currency VAT when it differs;
+- read the buyer country from the invoice billing snapshot and strictly validate dates, countries, Romanian subdivisions, units, currencies, identifiers, and optional blocks;
+- allocate before-tax discounts across VAT profiles and represent the Perfex adjustment as payable rounding;
+- add explicit VAT profiles for standard, exempt, reverse-charge, and non-VAT seller fixtures;
+- apply the unidentified Romanian B2C identifier only from January 15, 2026 and only for an explicitly selected buyer type;
+- validate all module settings server-side through a dedicated administrator POST endpoint;
+- add a configurable reviewed default unit for invoice items that have no unit.
+
+### Security
+
+- reject binary floating-point source values, unsupported stacked taxes, ambiguous zero-tax mappings, after-tax discounts, invalid IBANs, unknown units, and unreconciled totals;
+- stop using SMTP configuration as a fiscal endpoint and omit empty optional XML elements;
+- return localized fail-closed generation errors with stable rule IDs and privacy-safe logs.
+
+### Tests and release engineering
+
+- add synthetic canonical fiscal fixtures, a mocked Perfex adapter fixture, settings validation tests, and validation-manifest checks;
+- pin OASIS UBL 2.1, EN 16931 UBL 1.3.16, and SaxonJ-HE 12.10 release-test metadata and checksums;
+- validate representative generated fixtures with the normative OASIS Invoice XSD and official CEN/TC 434 EN 16931 UBL 1.3.16 Schematron;
+- add migration 202, which preserves every earlier setting and creates only the missing default-unit option;
+- include libraries and the validation manifest in the reproducible package.
+
+## 2.0.1 - 2026-08-18
 
 ### Fixed
 

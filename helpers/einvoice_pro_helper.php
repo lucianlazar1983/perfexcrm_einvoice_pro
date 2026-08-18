@@ -1,6 +1,13 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+require_once dirname(__DIR__) . '/libraries/Einvoice_pro_validation_exception.php';
+require_once dirname(__DIR__) . '/libraries/Einvoice_pro_decimal.php';
+require_once dirname(__DIR__) . '/libraries/Einvoice_pro_codes.php';
+require_once dirname(__DIR__) . '/libraries/Einvoice_pro_document_builder.php';
+require_once dirname(__DIR__) . '/libraries/Einvoice_pro_perfex_mapper.php';
+require_once dirname(__DIR__) . '/libraries/Einvoice_pro_ubl_serializer.php';
+
 /**
  * Accepts only canonical positive integer route values.
  *
@@ -162,6 +169,19 @@ function einvoice_pro_settings_data(): array
             ['id' => 'english', 'name' => _l('e_invoice_language_english')],
         ],
         'xml_language'       => get_option('einvoice_pro_xml_language'),
+        'default_unit_code'  => get_option('einvoice_pro_default_unit_code'),
+        'unit_codes' => [
+            ['id' => 'H87', 'name' => _l('e_invoice_unit_piece')],
+            ['id' => 'E48', 'name' => _l('e_invoice_unit_service')],
+            ['id' => 'HUR', 'name' => _l('e_invoice_unit_hour')],
+            ['id' => 'DAY', 'name' => _l('e_invoice_unit_day')],
+            ['id' => 'MON', 'name' => _l('e_invoice_unit_month')],
+            ['id' => 'KGM', 'name' => _l('e_invoice_unit_kilogram')],
+            ['id' => 'MTR', 'name' => _l('e_invoice_unit_metre')],
+            ['id' => 'MTK', 'name' => _l('e_invoice_unit_square_metre')],
+            ['id' => 'MTQ', 'name' => _l('e_invoice_unit_cubic_metre')],
+            ['id' => 'LTR', 'name' => _l('e_invoice_unit_litre')],
+        ],
         'registration'       => get_option('einvoice_pro_registration_number'),
         'company_legal_form' => get_option('einvoice_pro_company_legal_form'),
         'payment_iban'       => get_option('einvoice_pro_payment_iban'),
@@ -173,7 +193,7 @@ function einvoice_pro_settings_data(): array
 /**
  * Resolves one selected note, translating only the released preset values.
  *
- * Administrator-defined values are returned exactly as stored and escaped later by the XML view.
+ * Administrator-defined values are returned exactly as stored and encoded later by the DOM serializer.
  */
 function einvoice_pro_selected_note(string $index): ?string
 {
@@ -205,134 +225,140 @@ function einvoice_pro_selected_note(string $index): ?string
 }
 
 /**
- * Escapes a scalar for the legacy XML template at its final output boundary.
+ * Maps, reconciles, and serializes one Perfex invoice through the 2.0.2 pipeline.
  *
- * @param mixed $value Value rendered as XML text or an XML attribute.
+ * @param object $invoice Perfex invoice snapshot with items and customer data.
  */
-function einvoice_pro_xml_escape($value): string
+function einvoice_pro_generate_xml($invoice): string
 {
-    $value = $value === null ? '' : (string) $value;
+    $mapper = new Einvoice_pro_perfex_mapper();
+    $builder = new Einvoice_pro_document_builder();
+    $serializer = new Einvoice_pro_ubl_serializer();
 
-    return htmlspecialchars($value, ENT_XML1 | ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    return $serializer->serialize($builder->build($mapper->map($invoice)));
 }
 
 /**
- * Builds the data consumed by the legacy UBL template.
- *
- * This compatibility path is retained for the 1.4.3 upgrade. It will be replaced by the
- * validated canonical mapper and DOM serializer described in ARCHITECTURE.md.
- *
- * @param object $invoice Perfex invoice snapshot with its items and client.
- *
- * @return array<string, mixed>
+ * Converts a validation rule into a localized, non-sensitive explanation.
  */
-function einvoice_pro_generate_template_data($invoice): array
+function einvoice_pro_validation_message(string $rule): string
 {
-    $CI = &get_instance();
-    $CI->load->model('currencies_model');
-
-    // The legacy mapper still reads Perfex options directly until the canonical adapter replaces it.
-    $company_vat = get_option('company_vat');
-    $company_country = get_country(get_option('invoice_company_country'));
-    $company_state_raw = einvoice_pro_xml_escape(get_option('company_state'));
-    $company_state = (strpos($company_state_raw, 'RO-') === 0) ? $company_state_raw : 'RO-' . $company_state_raw;
-    
-    $supplier = [
-        'COMPANY_EMAIL'           => einvoice_pro_xml_escape(get_option('smtp_email')),
-        'COMPANY_ID_NUMBER'       => einvoice_pro_xml_escape(preg_replace('/[^0-9]/', '', $company_vat)),
-        'COMPANY_NAME'            => einvoice_pro_xml_escape(get_option('invoice_company_name')),
-        'COMPANY_ADDRESS'         => einvoice_pro_xml_escape(get_option('invoice_company_address')),
-        'COMPANY_CITY'            => einvoice_pro_xml_escape(get_option('invoice_company_city')),
-        'COMPANY_STATE'           => $company_state,
-        'COMPANY_COUNTRY_ISO2'    => $company_country ? einvoice_pro_xml_escape($company_country->iso2) : 'RO',
-        'COMPANY_VAT_NUMBER'      => einvoice_pro_xml_escape($company_vat),
-        'COMPANY_REG_NUMBER'      => einvoice_pro_xml_escape(get_option('einvoice_pro_registration_number')),
-        'COMPANY_LEGAL_FORM'      => 'Capital social: ' . einvoice_pro_xml_escape(get_option('einvoice_pro_company_legal_form')),
-        'COMPANY_CONTACT_NAME'    => '',
-        'COMPANY_CONTACT_PHONE'   => einvoice_pro_xml_escape(get_option('invoice_company_phonenumber')),
-        'PAYMENT_IBAN'            => einvoice_pro_xml_escape(get_option('einvoice_pro_payment_iban')),
-        'PAYMENT_BANK_NAME'       => einvoice_pro_xml_escape(get_option('einvoice_pro_payment_bank_name')),
-        'PAYMENT_MEANS_CODE'      => '42',
+    $prefix = strstr($rule, '.', true);
+    $languageKeys = [
+        'invoice' => 'e_invoice_error_invoice',
+        'seller' => 'e_invoice_error_identity',
+        'buyer' => 'e_invoice_error_identity',
+        'country' => 'e_invoice_error_identity',
+        'subdivision' => 'e_invoice_error_identity',
+        'line' => 'e_invoice_error_line',
+        'unit' => 'e_invoice_error_line',
+        'tax' => 'e_invoice_error_tax',
+        'allowance' => 'e_invoice_error_total',
+        'total' => 'e_invoice_error_total',
+        'currency' => 'e_invoice_error_currency',
+        'payment' => 'e_invoice_error_payment',
+        'perfex' => 'e_invoice_error_source',
+        'decimal' => 'e_invoice_error_source',
     ];
 
-    $client_country = get_country($invoice->client->country);
-    $client_state_raw = einvoice_pro_xml_escape($invoice->billing_state);
-    $client_state = (strpos($client_state_raw, 'RO-') === 0) ? $client_state_raw : 'RO-' . $client_state_raw;
+    return _l($languageKeys[$prefix] ?? 'e_invoice_error_generic');
+}
 
-    $customer = [
-        'CUSTOMER_ID'                  => einvoice_pro_xml_escape($invoice->client->vat),
-        'CUSTOMER_NAME'                => einvoice_pro_xml_escape($invoice->client->company),
-        'INVOICE_BILLING_ADRESS'       => einvoice_pro_xml_escape($invoice->billing_street),
-        'INVOICE_BILLING_CITY'         => einvoice_pro_xml_escape($invoice->billing_city),
-        'INVOICE_BILLING_STATE'        => $client_state,
-        'INVOICE_BILLING_COUNTRY_ISO2' => $client_country ? einvoice_pro_xml_escape($client_country->iso2) : 'RO',
-        'CUSTOMER_VAT_NUMBER'          => einvoice_pro_xml_escape($invoice->client->vat),
-    ];
+/**
+ * Validates the complete module settings submission before any option is changed.
+ *
+ * @param mixed $payload
+ * @return array{valid: bool, values: array<string, string>}
+ */
+function einvoice_pro_validate_settings($payload): array
+{
+    if (!is_array($payload)) {
+        return ['valid' => false, 'values' => []];
+    }
 
-    $currency = $CI->currencies_model->get($invoice->currency);
+    $language = $payload['einvoice_pro_xml_language'] ?? null;
+    $unit = $payload['einvoice_pro_default_unit_code'] ?? null;
+    if (!is_string($language) || !in_array($language, ['english', 'romanian'], true) || !is_string($unit)) {
+        return ['valid' => false, 'values' => []];
+    }
 
-    $invoice_notes = [];
-    foreach (['1', '2', '3'] as $noteIndex) {
-        $note = einvoice_pro_selected_note($noteIndex);
-        if ($note !== null) {
-            $invoice_notes[] = ['NOTE' => einvoice_pro_xml_escape($note)];
+    try {
+        $unit = Einvoice_pro_codes::unit($unit);
+        $registration = einvoice_pro_setting_text(
+            $payload['einvoice_pro_registration_number'] ?? '',
+            100,
+            true
+        );
+        $capital = einvoice_pro_setting_text(
+            $payload['einvoice_pro_company_legal_form'] ?? '',
+            30,
+            true
+        );
+        $iban = einvoice_pro_setting_text($payload['einvoice_pro_payment_iban'] ?? '', 34, true);
+        $bank = einvoice_pro_setting_text($payload['einvoice_pro_payment_bank_name'] ?? '', 200, true);
+    } catch (Einvoice_pro_validation_exception $exception) {
+        return ['valid' => false, 'values' => []];
+    }
+
+    if ($capital !== '' && !preg_match('/^[0-9]+(?:\.[0-9]{1,2})?$/D', $capital)) {
+        return ['valid' => false, 'values' => []];
+    }
+    if ($iban !== '') {
+        try {
+            $iban = Einvoice_pro_codes::iban($iban);
+        } catch (Einvoice_pro_validation_exception $exception) {
+            return ['valid' => false, 'values' => []];
         }
     }
 
-    $invoice_details = [
-        'INVOICE_ID'         => einvoice_pro_xml_escape(format_invoice_number($invoice->id)),
-        'INVOICE_DATE'       => date('Y-m-d', strtotime($invoice->date)),
-        'INVOICE_DUE_DATE'   => date('Y-m-d', strtotime($invoice->duedate)),
-        'CURRENCY_CODE'      => $currency ? einvoice_pro_xml_escape($currency->name) : 'RON',
-        'TAX_CURRENCY_CODE'  => $currency ? einvoice_pro_xml_escape($currency->name) : 'RON',
-        'INVOICE_NOTES'      => $invoice_notes,
-        'INVOICE_SUBTOTAL'   => number_format($invoice->subtotal, 2, '.', ''),
-        'INVOICE_TOTAL_TAX'  => number_format($invoice->total_tax, 2, '.', ''),
-        'INVOICE_TOTAL'      => number_format($invoice->total, 2, '.', ''),
-        'INVOICE_BALANCE_DUE'=> number_format($invoice->total, 2, '.', ''),
+    $values = [
+        'einvoice_pro_xml_language' => $language,
+        'einvoice_pro_default_unit_code' => $unit,
+        'einvoice_pro_registration_number' => $registration,
+        'einvoice_pro_company_legal_form' => $capital,
+        'einvoice_pro_payment_iban' => $iban,
+        'einvoice_pro_payment_bank_name' => $bank,
     ];
-    
-    $line_items = [];
-    $tax_subtotals = [];
-    foreach ($invoice->items as $item) {
-        $item_taxes = get_invoice_item_taxes($item['id']);
-        $tax_rate = 0;
-        if (!empty($item_taxes)) {
-            $tax_rate = $item_taxes[0]['taxrate'];
+
+    $presets = [
+        '1' => ['', 'TVA la incasare'],
+        '2' => ['', 'Factura este valabila fara semnatura si stampila, conform art. 319 alin. 29 din legea 227/2015'],
+        '3' => ['', 'Modalitate plata -OP Bancar'],
+    ];
+    foreach (['1', '2', '3'] as $index) {
+        $selected = $payload['einvoice_pro_note_' . $index] ?? null;
+        if (!is_string($selected)) {
+            return ['valid' => false, 'values' => []];
         }
-        $line_items[] = [
-            'LINE_ITEM_ORDER'           => $item['item_order'],
-            'LINE_ITEM_QUANTITY_NUMBER' => number_format($item['qty'], 3, '.', ''),
-            'LINE_ITEM_QUANTITY_UNIT'   => empty($item['unit']) ? 'H87' : einvoice_pro_xml_escape($item['unit']),
-            'LINE_ITEM_TOTAL'           => number_format($item['qty'] * $item['rate'], 2, '.', ''),
-            'LINE_ITEM_DESCRIPTION'     => einvoice_pro_xml_escape($item['long_description']),
-            'LINE_ITEM_NAME'            => einvoice_pro_xml_escape($item['description']),
-            'TAX_RATE'                  => number_format($tax_rate, 2, '.', ''),
-            'LINE_ITEM_UNIT_PRICE'      => number_format($item['rate'], 4, '.', ''),
-        ];
-        foreach ($item_taxes as $tax) {
-            $current_tax_rate = (float)$tax['taxrate'];
-            if (!isset($tax_subtotals[$current_tax_rate])) {
-                $tax_subtotals[$current_tax_rate] = [
-                    'TAXABLE_AMOUNT' => 0,
-                    'TAX_AMOUNT'     => 0,
-                    'TAX_RATE'       => number_format($current_tax_rate, 2, '.', ''),
-                ];
-            }
-            $item_base_amount = $item['rate'] * $item['qty'];
-            $tax_subtotals[$current_tax_rate]['TAXABLE_AMOUNT'] += $item_base_amount;
-            $tax_subtotals[$current_tax_rate]['TAX_AMOUNT'] += ($item_base_amount / 100) * $current_tax_rate;
+
+        $decoded = einvoice_pro_decode_custom_notes(get_option('einvoice_pro_custom_notes_' . $index));
+        if (!$decoded['valid'] || !in_array($selected, array_merge($presets[$index], $decoded['notes']), true)) {
+            return ['valid' => false, 'values' => []];
         }
-    }
-    
-    $final_subtotals = [];
-    foreach($tax_subtotals as $subtotal) {
-        $final_subtotals[] = [
-            'TAXABLE_AMOUNT' => number_format($subtotal['TAXABLE_AMOUNT'], 2, '.', ''),
-            'TAX_AMOUNT'     => number_format($subtotal['TAX_AMOUNT'], 2, '.', ''),
-            'TAX_RATE'       => $subtotal['TAX_RATE'],
-        ];
+        $values['einvoice_pro_note_' . $index] = $selected;
     }
 
-    return array_merge($supplier, $customer, $invoice_details, ['LINE_ITEMS' => $line_items, 'TAX_SUBTOTALS' => $final_subtotals]);
+    return ['valid' => true, 'values' => $values];
+}
+
+/**
+ * Normalizes one settings text value while rejecting invalid UTF-8 and control characters.
+ *
+ * @param mixed $value
+ */
+function einvoice_pro_setting_text($value, int $maximumLength, bool $allowEmpty): string
+{
+    if (!is_string($value) || !einvoice_pro_is_valid_utf8($value)) {
+        throw new Einvoice_pro_validation_exception('settings.text', 'A settings value is invalid.');
+    }
+
+    $value = trim($value);
+    if ((!$allowEmpty && $value === '') || mb_strlen($value, 'UTF-8') > $maximumLength) {
+        throw new Einvoice_pro_validation_exception('settings.text', 'A settings value is invalid.');
+    }
+    if (preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', $value)) {
+        throw new Einvoice_pro_validation_exception('settings.text', 'A settings value is invalid.');
+    }
+
+    return $value;
 }

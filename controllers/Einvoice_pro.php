@@ -42,12 +42,34 @@ class Einvoice_pro extends AdminController
             $this->lang->load('einvoice_pro', $xmlLanguage);
         }
 
-        $invoiceData = einvoice_pro_generate_template_data($invoice);
-        $xml = $this->load->view(
-            'einvoice_pro/xml/template',
-            ['invoice_data' => $invoiceData],
-            true
-        );
+        try {
+            $xml = einvoice_pro_generate_xml($invoice);
+        } catch (Einvoice_pro_validation_exception $exception) {
+            log_message(
+                'warning',
+                'E-Invoice Pro blocked invoice ' . $invoiceId . ' with rule ' . $exception->rule()
+            );
+            show_error(
+                _l('e_invoice_generation_blocked') . ' '
+                    . einvoice_pro_validation_message($exception->rule())
+                    . ' [' . $exception->rule() . ']',
+                422,
+                _l('e_invoice_generation_error_title')
+            );
+            return;
+        } catch (Throwable $exception) {
+            $correlationId = bin2hex(random_bytes(8));
+            log_message(
+                'error',
+                'E-Invoice Pro generation failure ' . $correlationId . ' for invoice ' . $invoiceId
+            );
+            show_error(
+                _l('e_invoice_generation_internal_error') . ' ' . $correlationId,
+                500,
+                _l('e_invoice_generation_error_title')
+            );
+            return;
+        }
 
         $filename = einvoice_pro_xml_filename(format_invoice_number($invoice->id));
         $disposition = 'attachment; filename="' . $filename . '"; filename*=UTF-8\'\'' . rawurlencode($filename);
@@ -59,6 +81,33 @@ class Einvoice_pro extends AdminController
             ->set_header('Pragma: no-cache')
             ->set_header('X-Content-Type-Options: nosniff')
             ->set_output($xml);
+    }
+
+    /**
+     * Saves a complete, server-validated settings payload for an administrator.
+     */
+    public function save_settings(): void
+    {
+        if (!is_admin()) {
+            access_denied('E-Invoice Pro Settings');
+        }
+        if ($this->input->method(true) !== 'POST') {
+            show_404();
+        }
+
+        $result = einvoice_pro_validate_settings($this->input->post('settings', false));
+        if (!$result['valid']) {
+            set_alert('danger', _l('e_invoice_settings_invalid'));
+            redirect(admin_url('settings?group=einvoice_pro'));
+            return;
+        }
+
+        foreach ($result['values'] as $name => $value) {
+            update_option($name, $value);
+        }
+
+        set_alert('success', _l('settings_updated'));
+        redirect(admin_url('settings?group=einvoice_pro'));
     }
 
     /**

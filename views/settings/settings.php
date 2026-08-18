@@ -7,7 +7,7 @@ $settings = einvoice_pro_settings_data();
 
 <link rel="stylesheet" href="<?= html_escape(module_dir_url('einvoice_pro', 'assets/css/settings.css')); ?>">
 
-<?php echo form_open(admin_url('settings/update'), ['id' => 'einvoice-pro-settings-form']); ?>
+<?php echo form_open(admin_url('einvoice_pro/save_settings'), ['id' => 'einvoice-pro-settings-form']); ?>
 <div
     class="panel_s"
     id="einvoice-pro-settings"
@@ -27,6 +27,13 @@ $settings = einvoice_pro_settings_data();
             ['id', 'name'],
             _l('e_invoice_xml_language'),
             $settings['xml_language']
+        );
+        echo render_select(
+            'settings[einvoice_pro_default_unit_code]',
+            $settings['unit_codes'],
+            ['id', 'name'],
+            _l('e_invoice_default_unit'),
+            $settings['default_unit_code']
         );
         ?>
 

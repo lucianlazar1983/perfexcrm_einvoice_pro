@@ -4,13 +4,14 @@ defined('BASEPATH') or exit('No direct script access allowed');
 /*
 Module Name: E-Invoice Pro
 Description: Generates Romanian UBL e-invoice files from Perfex CRM invoices.
-Version: 2.0.1
+Version: 2.0.2
 Requires at least: 3.4.1
 Author: Lucian Lazar
 */
 
 define('EINVOICE_PRO_MODULE_NAME', 'einvoice_pro');
-define('EINVOICE_PRO_VERSION', '2.0.1');
+define('EINVOICE_PRO_VERSION', '2.0.2');
+define('EINVOICE_PRO_CUSTOMIZATION_ID', 'urn:cen.eu:en16931:2017#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1');
 define('EINVOICE_PRO_MAX_CUSTOM_NOTES', 50);
 define('EINVOICE_PRO_MAX_NOTE_LENGTH', 500);
 
@@ -51,6 +52,7 @@ function einvoice_pro_default_options(): array
         'einvoice_pro_note_2'               => 'Factura este valabila fara semnatura si stampila, conform art. 319 alin. 29 din legea 227/2015',
         'einvoice_pro_note_3'               => 'Modalitate plata -OP Bancar',
         'einvoice_pro_xml_language'         => 'romanian',
+        'einvoice_pro_default_unit_code'    => 'H87',
     ];
 }
 
