@@ -37,7 +37,9 @@
                 <cbc:CompanyLegalForm><?= $invoice_data['COMPANY_LEGAL_FORM'] ?></cbc:CompanyLegalForm>
             </cac:PartyLegalEntity>
             <cac:Contact>
+                <?php if ($invoice_data['COMPANY_CONTACT_NAME'] !== ''): ?>
                 <cbc:Name><?= $invoice_data['COMPANY_CONTACT_NAME'] ?></cbc:Name>
+                <?php endif; ?>
                 <cbc:Telephone><?= $invoice_data['COMPANY_CONTACT_PHONE'] ?></cbc:Telephone>
                 <cbc:ElectronicMail><?= $invoice_data['COMPANY_EMAIL'] ?></cbc:ElectronicMail>
             </cac:Contact>

@@ -1,72 +1,182 @@
-<a href='https://ko-fi.com/W7W61NW50T' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi6.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+# E-Invoice Pro for Perfex CRM
 
+E-Invoice Pro is a Perfex CRM module for generating Romanian UBL invoice XML from Perfex invoices. It provides an invoice download action, Romanian company and payment settings, reusable plain-text notes, English and Romanian administration text, and a native Perfex upgrade path.
 
-# E-Invoice Pro for PerfexCRM (Romania)
+## Version 2.0.0 status
 
-A minimalist, fully configurable module for PerfexCRM designed to generate UBL XML files compliant with the **Romanian e-factura national system (RO e-factura)**.
+Version 2.0.0 is currently an unreleased security and architecture baseline. It is a substantial revision of the original 1.4.3 module, but the fiscal engine is not yet the final target described by the project architecture.
 
-This module was built from the ground up to be lightweight, stable, and easy to configure, providing a simple one-click solution for generating valid e-invoices.
+The module can generate XML through the retained legacy mapper. The current repository does not yet contain pinned UBL XSD, EN 16931, and RO_CIUS validation artifacts, a decimal reconciliation engine, or a reproducible official MF/ANAF validation report. Therefore:
 
----
+- generated XML must not be described as ANAF-validated or guaranteed compliant;
+- this build is not approved for unattended fiscal production use;
+- every XML must be independently validated before submission;
+- the module must not be used as the only evidence of legal or fiscal compliance.
 
-## Features
+The module does not upload invoices to ANAF, manage SPV/OAuth credentials or certificates, sign documents, poll submission status, retrieve ANAF responses, or generate credit notes.
 
-*  **Valid XML Generation:** Creates UBL XML files that pass the official ANAF validator.
-*  **One-Click Download:** Adds a simple "e-Invoice" button directly to the invoice preview page.
-*  **Fully Configurable:** All company-specific data (Registration Number, Bank Info, Invoice Notes) is managed through a dedicated settings page, requiring no code changes.
-*  **Multi-language Support:** The module's user interface is available in both English and Romanian, automatically adapting to the user's language preference.
-*  **Selectable XML Language:** Allows you to choose the output language for the XML notes, independent of the admin interface language.
+## Implemented in 2.0.0
 
----
+### Security and access
 
-## Installation
+- invoice-level authorization is checked in both the preview action and download endpoint;
+- staff require Perfex invoice `view` permission or conservative `view_own` ownership through the invoice creator or assigned sales agent;
+- invoice route values accept positive integers only;
+- missing and inaccessible invoice IDs return the same not-found behavior;
+- custom-note mutations require administrator access, AJAX, POST, Perfex CSRF validation, action/index allowlists, valid UTF-8, and bounded input;
+- custom note text is inserted into the DOM with `textContent`, never interpreted as HTML;
+- XML downloads use normalized filenames plus `no-store`, `no-cache`, and `nosniff` headers;
+- JSON endpoints return explicit HTTP status codes and `application/json` content.
 
-1.  Download the module's `.zip` file from the repository.
-2.  Navigate to **Setup -> Modules** in your PerfexCRM admin area.
-3.  Click the **Install Module** button and upload the `.zip` file.
-4.  After the upload is complete, find **E-Invoice Pro** in the module list and click the **Activate** button. The necessary database settings will be created automatically.
+### Upgrade and maintenance
 
----
+- the module uses Perfex's documented `register_activation_hook` API;
+- clean activation is idempotent and does not replace existing option values;
+- migration `200_version_200.php` supports the direct 1.4.3 → 2.0.0 transition without rewriting released settings;
+- malformed legacy custom-note JSON is preserved and marked for manual review instead of being silently replaced;
+- module functions and constants use the `einvoice_pro_` and `EINVOICE_PRO_` prefixes;
+- settings JavaScript and CSS are separate assets;
+- the downloading staff member no longer changes generated XML content;
+- custom selected notes reach the XML as their stored plain text, while released presets remain translatable;
+- the package builder uses an explicit runtime allowlist and reproducible archive timestamps.
+
+## Known fiscal limitations
+
+The remaining legacy mapper has the following release blockers:
+
+- it uses floating-point calculations instead of an explicit decimal value model;
+- discounts, adjustments, allowances, charges, prepayments, and rounding are not mapped completely;
+- multiple-tax cases are not modeled safely;
+- VAT category is not derived for all standard, zero, exempt, and outside-scope cases;
+- free-form Perfex units are not mapped to a reviewed UN/ECE code list;
+- accounting-currency VAT behavior is incomplete;
+- missing dates, country/subdivision data, optional XML blocks, and buyer identity cases still need fail-closed validation;
+- buyer snapshot behavior and native Perfex 3.4+ e-invoice coexistence require integration testing against licensed source and runtime;
+- serialization still uses the legacy PHP XML view instead of the planned DOM/XMLWriter serializer and offline validator.
+
+These limitations are intentionally documented rather than hidden behind a generic “valid XML” claim.
+
+## Platform requirements
+
+Declared runtime target:
+
+- Perfex CRM 3.4.1 or later within an explicitly tested compatibility range;
+- PHP 8.1 minimum because Perfex 3.4 requires it;
+- patched PHP 8.4 or 8.5 recommended for production in 2026;
+- PHP `mbstring`, `libxml`, `dom`, `xml`, `xmlreader`, and `xmlwriter` extensions;
+- HTTPS and Perfex CSRF protection enabled.
+
+Local development checks currently pass on PHP 8.4.24 and PHP 8.5.9. This does not replace installation tests inside Perfex. No stable compatibility claim is made for a Perfex version until the packaged module passes its licensed staging matrix.
+
+Perfex CRM 3.4 introduced native e-invoice exports. Confirm action placement, hook payloads, permissions, and output ownership in staging before enabling this module for staff.
+
+## Clean installation
+
+1. Back up the Perfex files and database.
+2. Build or obtain the E-Invoice Pro archive and inspect its checksum and contents.
+3. Install the archive from **Setup → Modules**, or place the `einvoice_pro` directory under the Perfex `modules` directory.
+4. Confirm that both the directory and initialization file are named `einvoice_pro` and `einvoice_pro.php`.
+5. Activate **E-Invoice Pro**.
+6. Open **Setup → Settings → Finance → E-Invoice Pro**.
+7. Review every value; do not rely on defaults as proof of correct fiscal identity.
+8. Test administrator access, staff permissions, direct URL denial, note management, and XML download using synthetic invoices.
+
+Activation creates only missing module options. Retrying activation does not overwrite a value from an earlier or partially completed installation.
+
+## Upgrade from 1.4.3
+
+Version 1.4.3 is the supported upgrade floor for 2.0.0.
+
+1. Back up the complete module directory and Perfex database together.
+2. Record the current E-Invoice Pro registration, bank, language, selected-note, and custom-note values.
+3. Replace the 1.4.3 files with the 2.0.0 package without deleting database options.
+4. Open **Setup → Modules** and confirm that Perfex detects version 2.0.0.
+5. Run the normal Perfex **Upgrade Database** action.
+6. Migration `200_version_200.php` should execute once. It intentionally performs no data writes so the 1.4.3 values remain unchanged.
+7. Reopen the settings page and compare every recorded value.
+8. Verify authorized and unauthorized invoice access through the actual download endpoint.
+9. Validate a representative set of synthetic XML documents before considering the upgraded installation operational.
+
+The repository includes a synthetic 1.4.3 option fixture and a local preservation simulation. The migration has not yet been executed against a licensed Perfex 3.4.1 database in this workspace. Perfex module migrations are forward-only; recovery requires restoring the matching files and database backup. Installing older files over a newer database is not a supported downgrade.
 
 ## Configuration
 
-All module settings are located in a dedicated panel, ensuring a clean integration with PerfexCRM.
+The current settings panel contains:
 
-**How to find the settings page:**
-1.  Navigate to **Setup -> Settings**.
-2.  Click on the **Finance** tab.
-3.  You will see a new sub-tab called **E-Invoice Pro**. Click on it.
+| Setting | Stored option | Notes |
+|---|---|---|
+| XML note language | `einvoice_pro_xml_language` | English or Romanian preset text |
+| Trade Register number | `einvoice_pro_registration_number` | Separate from the Perfex VAT option |
+| Legal-capital value | `einvoice_pro_company_legal_form` | Legacy field retained during modernization |
+| Payment IBAN | `einvoice_pro_payment_iban` | Requires independent fiscal/business validation |
+| Bank name | `einvoice_pro_payment_bank_name` | Plain text |
+| Note slots 1–3 | `einvoice_pro_note_1` … `_3` | Empty, preset, or administrator-defined text |
+| Custom note choices | `einvoice_pro_custom_notes_1` … `_3` | JSON arrays retained for 1.4.3 compatibility |
 
+Custom notes are limited to 500 UTF-8 characters and 50 values per slot. New values are trimmed, stored as text, displayed as text, and escaped for their final output context. Invalid legacy JSON or oversized legacy values are not overwritten from the note manager; the settings page shows a review warning.
 
+Only administrators may manage module settings and reusable note values. Invoice downloads follow the concrete invoice permission check independently of whether the button is visible.
 
-### Configuration Fields Explained
+## Development checks
 
-Here is an explanation of each setting and why it's needed for the e-factura XML file.
+Run from the module repository root:
 
-#### XML Output Language
-* **XML Generation Language:** This dropdown controls the language of the notes included in the final XML file. You can have your PerfexCRM interface in English but generate an XML with notes in Romanian, or vice-versa.
+```bash
+php tests/smoke.php
+node --check assets/js/settings.js
+node tests/frontend-security.mjs
+git diff --check
+php scripts/package.php
+```
 
-#### Company Details
-* **Company Registration Number:** This field is **required** by the e-factura standard and is configured **directly on this settings page**. You should enter your company's registration number from the Trade Register (e.g., `J12/1234/1999`). This value populates the following tag in the XML:
-    ```xml
-    <cac:PartyLegalEntity>
-        <cbc:CompanyID>J12/1234/1999</cbc:CompanyID>
-    </cac:PartyLegalEntity>
-    ```
-    *Note: This is different from the `VAT Number`, which is configured in the standard PerfexCRM settings (`Setup -> Settings -> Company Information`).*
+The smoke suite covers route IDs, conservative invoice permissions, filename normalization, UTF-8 and malformed custom-note JSON, English/Romanian language-key parity, clean activation defaults, and preservation of the complete synthetic 1.4.3 option fixture through activation and migration 200.
 
-* **Social Capital (numeric value only):** Enter the numeric value of your company's social capital (e.g., `200`). The module will automatically prepend the text "Capital social: " to the value in the XML file.
+The frontend regression prevents database-backed `innerHTML`, manual JSON parsing, and inline settings JavaScript from being reintroduced. PHP lint must also run over every PHP file:
 
-#### Bank Details
-* **IBAN Account:** Enter the IBAN where you wish to receive payments for the invoice.
-* **Bank Name:** Enter the name of your bank. These fields populate the `<cac:PaymentMeans>` block in the XML.
+```bash
+find . -type f -name '*.php' -not -path './vendor/*' -exec php -l {} \;
+```
 
-#### Invoice Notes
-*   **manage Custom Values:** Next to each note dropdown, you have the ability to click "Manage Values". This opens a panel where you can:
-    *   **Add New Notes:** Define your own custom text for notes.
-    *   **Delete Existing Notes:** Remove notes you no longer use (except for the built-in defaults).
-    *   **Selection:** The dropdowns will be automatically updated with your custom values.
-*   **Selectable XML Language:** The text of the *default* notes is automatically translated based on the **XML Generation Language** you selected. Custom notes added by you will appear exactly as typed.
-*   To omit a note, simply select **"None"**.
+## Building the package
 
-After configuring all the fields, click the **Save Settings** button. The module is now ready to use!
+```bash
+php scripts/package.php
+```
+
+The archive is written to `dist/einvoice_pro-<version>.zip`. The builder reads the version from the module header, places files under one `einvoice_pro/` root, fixes archive timestamps, and includes only:
+
+- runtime PHP, JavaScript, CSS, language, migration, and view files;
+- `README.md`, `CHANGELOG.md`, and `LICENSE`.
+
+It excludes Git data, tests and fixtures, IDE files, local caches, logs, development instructions, architecture sources, and verification records. Build the final archive twice and compare SHA-256 values before release.
+
+## Release blockers
+
+A stable or compliance-labelled release additionally requires:
+
+1. clean installation and exact 1.4.3 upgrade inside licensed Perfex 3.4.1;
+2. the same integration suite on the latest Perfex version declared as supported;
+3. real HTTP tests for permissions, CSRF, JSON/XML statuses, headers, and native export coexistence;
+4. the canonical decimal model and complete supported/unsupported fiscal-case matrix;
+5. DOM/XMLWriter serialization;
+6. pinned local UBL XSD, EN 16931, and RO_CIUS/RO_NAT artifacts with checksums and licenses;
+7. positive and negative synthetic fixture validation;
+8. current official MF/ANAF validator evidence for the exact package;
+9. browser, accessibility, responsive-layout, CI, static-analysis, and packaging checks.
+
+No critical release blocker may be converted into a warning merely to ship the module.
+
+## Repository documentation
+
+The development repository contains additional documents that are deliberately excluded from the installable archive:
+
+- `AGENTS.md` — mandatory development and security rules;
+- `ARCHITECTURE.md` — current audit, target architecture, domain boundaries, and debt register;
+- `MODERNIZATION_PLAN.md` — phased implementation and release plan;
+- `VERIFICATION.md` — dated evidence for the current working tree.
+
+When working from a distribution archive, this README and the changelog are the self-contained operational documentation.
+
+## License
+
+The project is distributed under the terms in `LICENSE`.

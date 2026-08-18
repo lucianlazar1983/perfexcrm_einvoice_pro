@@ -2,7 +2,7 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 $lang['e_invoice_pro'] = 'E-Invoice Pro';
-$lang['e_invoice_pro_module_description'] = 'Minimalist module for generating RO-UBL compatible e-invoices.';
+$lang['e_invoice_pro_module_description'] = 'Generates Romanian UBL e-invoice files from Perfex CRM invoices.';
 $lang['e_invoice_button_text'] = 'e-Invoice';
 $lang['e_invoice_settings_title'] = 'E-Invoice Pro Module Settings';
 $lang['e_invoice_reg_number'] = 'Company Registration Number';
@@ -22,3 +22,18 @@ $lang['e_invoice_manage_values'] = 'Manage Values';
 $lang['e_invoice_add_new_value'] = 'Add New Value';
 $lang['e_invoice_custom_values'] = 'Custom Values';
 $lang['e_invoice_value_exists'] = 'This value already exists!';
+$lang['e_invoice_language_romanian'] = 'Romanian';
+$lang['e_invoice_language_english'] = 'English';
+$lang['e_invoice_delete_confirmation'] = 'Delete this custom value?';
+$lang['e_invoice_delete_value'] = 'Delete value';
+$lang['e_invoice_invalid_action'] = 'The requested note action is not supported.';
+$lang['e_invoice_invalid_note_index'] = 'The selected note slot is not valid.';
+$lang['e_invoice_invalid_note_value'] = 'Enter a valid note of no more than 500 characters.';
+$lang['e_invoice_note_limit_reached'] = 'This note slot already contains the maximum number of custom values.';
+$lang['e_invoice_notes_storage_invalid'] = 'The stored custom values are malformed and were left unchanged. Review the option before editing it.';
+$lang['e_invoice_notes_storage_review'] = 'The saved custom values for this note need review. They were preserved and cannot be edited from this screen yet.';
+$lang['e_invoice_notes_save_failed'] = 'The custom values could not be saved.';
+$lang['e_invoice_value_added'] = 'The value was added.';
+$lang['e_invoice_value_deleted'] = 'The value was deleted.';
+$lang['e_invoice_value_not_found'] = 'The value no longer exists.';
+$lang['e_invoice_request_failed'] = 'The request could not be completed. Please try again.';
