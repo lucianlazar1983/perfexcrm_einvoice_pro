@@ -135,6 +135,19 @@ require dirname(__DIR__) . '/helpers/einvoice_pro_helper.php';
 
 $einvoiceProTestFailures = [];
 
+$bootstrapSource = file_get_contents(dirname(__DIR__) . '/einvoice_pro.php');
+$controllerSource = file_get_contents(dirname(__DIR__) . '/controllers/Einvoice_pro.php');
+einvoice_pro_test_same(
+    2,
+    substr_count((string) $bootstrapSource, "load->helper('einvoice_pro/einvoice_pro')"),
+    'module-scoped bootstrap helper paths'
+);
+einvoice_pro_test_same(
+    1,
+    substr_count((string) $controllerSource, "load->helper('einvoice_pro/einvoice_pro')"),
+    'module-scoped controller helper path'
+);
+
 einvoice_pro_test_same(12, einvoice_pro_positive_integer('12'), 'positive numeric route value');
 einvoice_pro_test_same(null, einvoice_pro_positive_integer('012'), 'leading zero route value');
 einvoice_pro_test_same(null, einvoice_pro_positive_integer("1\r\nX-Test: yes"), 'header-shaped route value');
@@ -198,12 +211,17 @@ class App_module_migration
 }
 
 require dirname(__DIR__) . '/migrations/200_version_200.php';
+require dirname(__DIR__) . '/migrations/201_version_201.php';
 
 $einvoiceProTestOptions = $fixture;
 $optionsBeforeMigration = $einvoiceProTestOptions;
 $migration = new Migration_Version_200();
 $migration->up();
 einvoice_pro_test_same($optionsBeforeMigration, $einvoiceProTestOptions, 'migration 200 preserves every 1.4.3 option');
+
+$migration = new Migration_Version_201();
+$migration->up();
+einvoice_pro_test_same($optionsBeforeMigration, $einvoiceProTestOptions, 'migration 201 preserves every 1.4.3 option');
 
 $lang = [];
 require dirname(__DIR__) . '/language/english/einvoice_pro_lang.php';

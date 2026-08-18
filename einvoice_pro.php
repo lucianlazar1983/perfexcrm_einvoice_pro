@@ -4,13 +4,13 @@ defined('BASEPATH') or exit('No direct script access allowed');
 /*
 Module Name: E-Invoice Pro
 Description: Generates Romanian UBL e-invoice files from Perfex CRM invoices.
-Version: 2.0.0
+Version: 2.0.1
 Requires at least: 3.4.1
 Author: Lucian Lazar
 */
 
 define('EINVOICE_PRO_MODULE_NAME', 'einvoice_pro');
-define('EINVOICE_PRO_VERSION', '2.0.0');
+define('EINVOICE_PRO_VERSION', '2.0.1');
 define('EINVOICE_PRO_MAX_CUSTOM_NOTES', 50);
 define('EINVOICE_PRO_MAX_NOTE_LENGTH', 500);
 
@@ -60,7 +60,7 @@ function einvoice_pro_default_options(): array
 function einvoice_pro_module_init(): void
 {
     $CI = &get_instance();
-    $CI->load->helper('einvoice_pro');
+    $CI->load->helper('einvoice_pro/einvoice_pro');
 
     $CI->app->add_settings_section_child(
         'finance',
@@ -81,7 +81,7 @@ function einvoice_pro_module_init(): void
 function einvoice_pro_invoice_button($invoice): void
 {
     $CI = &get_instance();
-    $CI->load->helper('einvoice_pro');
+    $CI->load->helper('einvoice_pro/einvoice_pro');
 
     if (!einvoice_pro_can_view_invoice($invoice)) {
         return;

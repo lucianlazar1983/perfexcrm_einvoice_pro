@@ -15,7 +15,7 @@ class Einvoice_pro extends AdminController
         parent::__construct();
 
         $this->load->model('invoices_model');
-        $this->load->helper('einvoice_pro');
+        $this->load->helper('einvoice_pro/einvoice_pro');
     }
 
     /**

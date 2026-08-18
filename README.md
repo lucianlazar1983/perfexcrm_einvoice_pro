@@ -2,9 +2,9 @@
 
 E-Invoice Pro is a Perfex CRM module for generating Romanian UBL invoice XML from Perfex invoices. It provides an invoice download action, Romanian company and payment settings, reusable plain-text notes, English and Romanian administration text, and a native Perfex upgrade path.
 
-## Version 2.0.0 status
+## Version 2.0.1 status
 
-Version 2.0.0 is currently an unreleased security and architecture baseline. It is a substantial revision of the original 1.4.3 module, but the fiscal engine is not yet the final target described by the project architecture.
+Version 2.0.1 is currently an unreleased security and architecture baseline. It is a substantial revision of the original 1.4.3 module, but the fiscal engine is not yet the final target described by the project architecture. It supersedes the initial 2.0.0 package, which used an application-level helper path instead of Perfex's module-scoped helper path.
 
 The module can generate XML through the retained legacy mapper. The current repository does not yet contain pinned UBL XSD, EN 16931, and RO_CIUS validation artifacts, a decimal reconciliation engine, or a reproducible official MF/ANAF validation report. Therefore:
 
@@ -15,7 +15,7 @@ The module can generate XML through the retained legacy mapper. The current repo
 
 The module does not upload invoices to ANAF, manage SPV/OAuth credentials or certificates, sign documents, poll submission status, retrieve ANAF responses, or generate credit notes.
 
-## Implemented in 2.0.0
+## Implemented in 2.0.x
 
 ### Security and access
 
@@ -32,7 +32,8 @@ The module does not upload invoices to ANAF, manage SPV/OAuth credentials or cer
 
 - the module uses Perfex's documented `register_activation_hook` API;
 - clean activation is idempotent and does not replace existing option values;
-- migration `200_version_200.php` supports the direct 1.4.3 → 2.0.0 transition without rewriting released settings;
+- migrations `200_version_200.php` and `201_version_201.php` support direct 1.4.3 → 2.0.1 and 2.0.0 → 2.0.1 transitions without rewriting released settings;
+- helper loading uses the documented `einvoice_pro/einvoice_pro` module path from both bootstrap hooks and the controller;
 - malformed legacy custom-note JSON is preserved and marked for manual review instead of being silently replaced;
 - module functions and constants use the `einvoice_pro_` and `EINVOICE_PRO_` prefixes;
 - settings JavaScript and CSS are separate assets;
@@ -85,14 +86,14 @@ Activation creates only missing module options. Retrying activation does not ove
 
 ## Upgrade from 1.4.3
 
-Version 1.4.3 is the supported upgrade floor for 2.0.0.
+Version 1.4.3 is the supported upgrade floor for 2.0.1.
 
 1. Back up the complete module directory and Perfex database together.
 2. Record the current E-Invoice Pro registration, bank, language, selected-note, and custom-note values.
-3. Replace the 1.4.3 files with the 2.0.0 package without deleting database options.
-4. Open **Setup → Modules** and confirm that Perfex detects version 2.0.0.
+3. Replace the 1.4.3 files with the 2.0.1 package without deleting database options.
+4. Open **Setup → Modules** and confirm that Perfex detects version 2.0.1.
 5. Run the normal Perfex **Upgrade Database** action.
-6. Migration `200_version_200.php` should execute once. It intentionally performs no data writes so the 1.4.3 values remain unchanged.
+6. Migrations `200_version_200.php` and `201_version_201.php` should execute in order. They intentionally perform no data writes so the 1.4.3 values remain unchanged.
 7. Reopen the settings page and compare every recorded value.
 8. Verify authorized and unauthorized invoice access through the actual download endpoint.
 9. Validate a representative set of synthetic XML documents before considering the upgraded installation operational.
@@ -129,7 +130,7 @@ git diff --check
 php scripts/package.php
 ```
 
-The smoke suite covers route IDs, conservative invoice permissions, filename normalization, UTF-8 and malformed custom-note JSON, English/Romanian language-key parity, clean activation defaults, and preservation of the complete synthetic 1.4.3 option fixture through activation and migration 200.
+The smoke suite covers route IDs, conservative invoice permissions, filename normalization, UTF-8 and malformed custom-note JSON, English/Romanian language-key parity, module-scoped helper loading, clean activation defaults, and preservation of the complete synthetic 1.4.3 option fixture through activation and migrations 200/201.
 
 The frontend regression prevents database-backed `innerHTML`, manual JSON parsing, and inline settings JavaScript from being reintroduced. PHP lint must also run over every PHP file:
 

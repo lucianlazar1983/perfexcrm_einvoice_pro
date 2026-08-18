@@ -2,7 +2,15 @@
 
 All notable changes to E-Invoice Pro are documented here. Versions follow Semantic Versioning where fiscal-output changes require at least a minor release after the 2.0.0 architecture baseline.
 
-## 2.0.0 - Unreleased
+## 2.0.1 - Unreleased
+
+### Fixed
+
+- load `helpers/einvoice_pro_helper.php` through Perfex's module-scoped `einvoice_pro/einvoice_pro` path in the bootstrap and controller;
+- add the required empty `201_version_201.php` migration so existing 2.0.0 installations can advance through the native module upgrade flow;
+- retain migration 200 so direct upgrades from 1.4.3 remain supported.
+
+## 2.0.0 - Superseded during deployment validation
 
 ### Security
 
