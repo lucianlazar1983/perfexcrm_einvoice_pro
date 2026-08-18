@@ -62,9 +62,11 @@ Here is an explanation of each setting and why it's needed for the e-factura XML
 * **Bank Name:** Enter the name of your bank. These fields populate the `<cac:PaymentMeans>` block in the XML.
 
 #### Invoice Notes
-These dropdowns allow you to select up to three predefined notes to be included in the XML file. The text of these notes is automatically translated based on the **XML Generation Language** you selected above.
-
-* You can choose a predefined note from each dropdown.
-* To omit a note, simply select **"None"**.
+*   **manage Custom Values:** Next to each note dropdown, you have the ability to click "Manage Values". This opens a panel where you can:
+    *   **Add New Notes:** Define your own custom text for notes.
+    *   **Delete Existing Notes:** Remove notes you no longer use (except for the built-in defaults).
+    *   **Selection:** The dropdowns will be automatically updated with your custom values.
+*   **Selectable XML Language:** The text of the *default* notes is automatically translated based on the **XML Generation Language** you selected. Custom notes added by you will appear exactly as typed.
+*   To omit a note, simply select **"None"**.
 
 After configuring all the fields, click the **Save Settings** button. The module is now ready to use!
