@@ -4,13 +4,13 @@ defined('BASEPATH') or exit('No direct script access allowed');
 /*
 Module Name: E-Invoice RO
 Description: Generates Romanian UBL invoice files with strict fiscal mapping for Perfex CRM.
-Version: 2.0.2
+Version: 2.0.3
 Requires at least: 3.4.1
 Author: Lucian Lazar
 */
 
 define('EINVOICE_PRO_MODULE_NAME', 'einvoice_pro');
-define('EINVOICE_PRO_VERSION', '2.0.2');
+define('EINVOICE_PRO_VERSION', '2.0.3');
 define('EINVOICE_PRO_CUSTOMIZATION_ID', 'urn:cen.eu:en16931:2017#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1');
 define('EINVOICE_PRO_MAX_CUSTOM_NOTES', 50);
 define('EINVOICE_PRO_MAX_NOTE_LENGTH', 500);

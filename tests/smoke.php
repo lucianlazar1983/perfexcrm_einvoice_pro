@@ -167,6 +167,8 @@ einvoice_pro_test_same(
     'public module name'
 );
 einvoice_pro_test_same('einvoice_pro', EINVOICE_PRO_MODULE_NAME, 'stable technical module identifier');
+einvoice_pro_test_same('2.0.3', EINVOICE_PRO_VERSION, 'patch version constant');
+einvoice_pro_test_same(1, substr_count((string) $bootstrapSource, 'Version: 2.0.3'), 'patch version header');
 einvoice_pro_test_same(
     2,
     substr_count((string) $bootstrapSource, "load->helper('einvoice_pro/einvoice_pro')"),
@@ -269,6 +271,7 @@ class App_module_migration
 require dirname(__DIR__) . '/migrations/200_version_200.php';
 require dirname(__DIR__) . '/migrations/201_version_201.php';
 require dirname(__DIR__) . '/migrations/202_version_202.php';
+require dirname(__DIR__) . '/migrations/203_version_203.php';
 
 $einvoiceProTestOptions = $fixture;
 $optionsBeforeMigration = $einvoiceProTestOptions;
@@ -286,6 +289,15 @@ einvoice_pro_test_same(
     $fixture + ['einvoice_pro_default_unit_code' => 'H87'],
     $einvoiceProTestOptions,
     'migration 202 preserves legacy options and adds the explicit unit default'
+);
+
+$optionsBeforePatchMigration = $einvoiceProTestOptions;
+$migration = new Migration_Version_203();
+$migration->up();
+einvoice_pro_test_same(
+    $optionsBeforePatchMigration,
+    $einvoiceProTestOptions,
+    'migration 203 preserves every existing option'
 );
 
 $lang = [];

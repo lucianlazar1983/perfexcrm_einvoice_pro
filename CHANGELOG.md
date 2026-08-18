@@ -2,7 +2,19 @@
 
 All notable changes to E-Invoice RO are documented here. Versions follow Semantic Versioning where fiscal-output changes require at least a minor release after the 2.0.0 architecture baseline.
 
-## 2.0.2 - Unreleased
+## 2.0.3 - Unreleased
+
+### Fixed
+
+- read the explicit `invoice_company_country_code` used by Perfex 3.4 before the legacy country identifier;
+- accept an ISO alpha-2 company country code directly while retaining object/array country records and legacy numeric IDs;
+- keep country resolution fail-closed when neither the current nor legacy Perfex value can be resolved.
+
+### Upgrade
+
+- add the data-neutral migration 203 so an installed 2.0.2 module detects the patch through Perfex's native upgrade flow.
+
+## 2.0.2 - 2026-08-18
 
 ### Changed
 

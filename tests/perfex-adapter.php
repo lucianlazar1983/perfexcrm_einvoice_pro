@@ -11,7 +11,8 @@ define('BASEPATH', __DIR__);
 define('EINVOICE_PRO_CUSTOMIZATION_ID', 'urn:cen.eu:en16931:2017#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1');
 
 $adapterOptions = [
-    'invoice_company_country' => '1',
+    'invoice_company_country_code' => 'RO',
+    'invoice_company_country' => '999',
     'company_vat' => 'RO10000001',
     'invoice_company_name' => 'Furnizor Sintetic SRL',
     'invoice_company_address' => 'Strada Exemplu 1',
@@ -56,14 +57,18 @@ function get_option(string $name)
  * Resolves the two synthetic country identifiers used by the fixture.
  *
  * @param mixed $identifier
- * @return object|null
+ * @return object|array<string, string>|null
  */
-function get_country($identifier): ?object
+function get_country($identifier)
 {
-    $countries = ['1' => 'RO', '2' => 'DE'];
+    $countries = [
+        '1' => (object) ['iso2' => 'RO'],
+        '2' => (object) ['iso2' => 'DE'],
+        '3' => ['iso2' => 'RO'],
+    ];
     $key = (string) $identifier;
 
-    return isset($countries[$key]) ? (object) ['iso2' => $countries[$key]] : null;
+    return $countries[$key] ?? null;
 }
 
 /**
@@ -249,12 +254,22 @@ function adapter_same($expected, $actual, string $label): void
 }
 
 adapter_same('DE', $document['buyer']['address']['country_code'], 'invoice snapshot country wins over current client country');
+adapter_same('RO', $document['seller']['address']['country_code'], 'Perfex 3.4 company country code');
 adapter_same(2, count($document['tax_subtotals']), 'two Perfex VAT rates');
 adapter_same(2, count($document['allowances_charges']), 'discount allocated across VAT rates');
 adapter_same('30.40', $document['totals']['tax_amount'], 'discounted VAT reconciliation');
 adapter_same('220.41', $document['totals']['payable'], 'Perfex payable reconciliation');
 adapter_same(0, substr_count($xml, '<cbc:TaxCurrencyCode>'), 'RON adapter omits tax currency');
 adapter_same(true, (new DOMDocument())->loadXML($xml, LIBXML_NONET), 'adapter XML parses offline');
+
+unset($adapterOptions['invoice_company_country_code']);
+$adapterOptions['invoice_company_country'] = '1';
+$legacyCountryDocument = $builder->build($mapper->map($invoice));
+adapter_same('RO', $legacyCountryDocument['seller']['address']['country_code'], 'legacy country identifier remains supported');
+$adapterOptions['invoice_company_country'] = '3';
+$legacyArrayCountryDocument = $builder->build($mapper->map($invoice));
+adapter_same('RO', $legacyArrayCountryDocument['seller']['address']['country_code'], 'legacy array country record');
+$adapterOptions['invoice_company_country_code'] = 'RO';
 
 $invoice->client->vat = '100000003';
 $nonVatBuyer = $builder->build($mapper->map($invoice));
