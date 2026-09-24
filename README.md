@@ -165,6 +165,17 @@ The frontend regression prevents database-backed `innerHTML`, manual JSON parsin
 find . -type f -name '*.php' -not -path './vendor/*' -exec php -l {} \;
 ```
 
+### Required coverage
+
+Any change to mapping, totals, VAT, dates, identifiers, serialization, validation, authorization, migrations, or settings extends the matching suite above rather than adding a parallel runner. Coverage to keep or add by area:
+
+- **Unit**: validation/normalization of every configurable field; decimal reconciliation at rounding boundaries; every supported VAT-category mapping; notes and output-language selection; missing/invalid dates and UTF-8/XML-special characters; filename and response-header injection resistance; platform capability detection and upgrade preflight.
+- **Positive fixtures**: B2B in RON with standard VAT; multiple VAT rates; zero/exempt VAT with reason; percentage/fixed discount and positive/negative adjustment; identified and unidentified B2C by effective date; EU and non-EU customers; EUR invoice with VAT accounting in RON; Romanian diacritics, ampersands, quotes, multiline descriptions.
+- **Negative fixtures**: missing mandatory field; unknown unit/category/code; unreconciled totals; unsupported multiple-tax case; invalid XML or missing/corrupt validator artifact.
+- **Integration and security**: staff without `view`, with `view_own`, authorized staff, admin; direct access to another invoice ID; invalid/missing invoice ID; mutation without CSRF; XSS payload in notes and settings; JSON/XML response status, content type, cache headers; coexistence with the native Perfex 3.4+ export; clean install, upgrade from an exact 1.4.3 fixture and from every other supported release, repeated upgrade, failed preflight, post-upgrade health check; preservation of all 1.4.3 settings and custom-note JSON through migration.
+
+Every positive fixture passes UBL XSD, EN 16931, and the pinned RO_CIUS artifacts. A representative subset passes the current official MF/ANAF validator during release; store the validator version and result summary, never real tax data.
+
 ## Building the package
 
 ```bash
