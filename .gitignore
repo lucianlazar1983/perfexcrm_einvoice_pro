@@ -5,6 +5,4 @@ vendor/
 .phpunit.cache/
 AGENTS.md
 ARCHITECTURE.md
-MODERNIZATION_PLAN.md
-VERIFICATION.md
 CLAUDE.md
